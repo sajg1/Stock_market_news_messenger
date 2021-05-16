@@ -18,6 +18,10 @@ stock_data = stock_response.json()
 
 # Created a list of all daily closing prices for this stock
 daily_stock_prices = [value['4. close'] for (key, value) in stock_data["Time Series (Daily)"].items()]
-yesterdays_closing_price = daily_stock_prices[0]
-print(yesterdays_closing_price)
 
+# Isolate the  last to days closing prices and find the price diff and the percentage diff
+yesterdays_closing_price = daily_stock_prices[0]
+day_before_yesterday_closing_price = daily_stock_prices[1]
+
+closing_price_diff = round(float(yesterdays_closing_price) - float(day_before_yesterday_closing_price), 2)
+percentage_price_diff = round((closing_price_diff / float(day_before_yesterday_closing_price)) * 100, 2)
