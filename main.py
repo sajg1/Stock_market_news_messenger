@@ -1,9 +1,12 @@
 import requests
 import datetime
 import os
+from twilio.rest import Client
 
 STOCK_URL = "https://www.alphavantage.co/query"
 NEWS_URL = "https://newsapi.org/v2/everything"
+TWILIO_ACC_SID = os.environ.get("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
 
 # using environment variable to store API key
 API_KEY = os.environ.get("STOCK_API_KEY")
@@ -27,8 +30,8 @@ day_before_yesterday_closing_price = daily_stock_prices[1]
 
 closing_price_diff = round(float(yesterdays_closing_price) - float(day_before_yesterday_closing_price), 2)
 percentage_price_diff = round((closing_price_diff / float(day_before_yesterday_closing_price)) * 100, 2)
-
-if percentage_price_diff > 3:
+print(percentage_price_diff)
+if percentage_price_diff > 2 or percentage_price_diff < -2:
 
     d1 = datetime.datetime.now()
     new_format = "%Y-%m-%d"
@@ -50,3 +53,15 @@ if percentage_price_diff > 3:
     # isolated just the headlines and descriptions of the current top 3 articles regarding Tesla
     top_3_articles_headlines_and_stories = [{x['title']: x['description']} for x in top_3_articles]
     print(top_3_articles_headlines_and_stories)
+
+    # create a new twilio client to send sms message
+    client = Client(TWILIO_ACC_SID, TWILIO_AUTH_TOKEN)
+
+    for article in top_3_articles_headlines_and_stories:
+        for headline, description in article.items():
+            message = client.messages.create(
+                body=f"{headline}\n{description}",
+                from_='+12156080935',
+                to='+447949272807'
+            )
+            print(message.status)
